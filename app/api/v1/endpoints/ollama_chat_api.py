@@ -23,8 +23,8 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str  # The generated chat response
 
-@router.post("/generate", response_model=ChatResponse)
-def generate_chat_response(request: ChatRequest):
+@router.post("/chat", response_model=ChatResponse)
+def chat_response(request: ChatRequest):
     """
     Generate a chat response based on the provided prompts.
 
@@ -43,10 +43,10 @@ def generate_chat_response(request: ChatRequest):
         
         logger.debug(f"Generating response for prompt: {request.prompt[:50]}...")
         response = ollama_chat.generate_response(
-            prompt=request.prompt,  # User's prompt
-            system_prompt=request.system_prompt,  # System's prompt
-            model=request.model,  # Optional model
-            max_tokens=request.max_tokens  # Optional max tokens
+            prompt=request.prompt,
+            system_prompt=request.system_prompt,
+            model=request.model,
+            max_tokens=request.max_tokens
         )
         
         logger.debug("Successfully generated response")

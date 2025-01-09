@@ -70,6 +70,10 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ### Available Endpoints
 The API will be available at:
 - API: http://localhost:8000/api/v1
+  - GET /hello - Test endpoint
+  - POST /chat - Chat generation endpoint
+  - POST /ollama-embeddings/embed - Create document embeddings
+  - POST /ollama-embeddings/search - Search through embeddings
 - [Detailed API Documentation](docs/API.md)
 
 
@@ -79,22 +83,30 @@ The API will be available at:
 <details>
 <summary><b>🔹 Frontend Setup</b></summary>
 
-1. Navigate to the frontend directory:
+The frontend is built with:
+- React 18+ with TypeScript
+- Vite for build tooling
+- Mantine UI for components
+- React Query for API state management
+- Axios for API requests
+
+To run the frontend:
+
 ```bash
 cd frontend
-```
-
-2. Install dependencies:
-```bash
 npm install
+npm run dev
 ```
 
-3. Start the development server:
-```bash
-npm start
-```
+The development server will start at `http://localhost:3000`
 
-The frontend will be available at http://localhost:3000
+### Environment Variables
+
+Create a `.env` file in the frontend directory:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
 </details>
 <details>
 <summary><b>🔹 Project Structure</b></summary>

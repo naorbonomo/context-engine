@@ -51,13 +51,13 @@ http GET http://localhost:8000/api/v1/hello
 </details>
 
 <details>
-<summary><b>POST /generate - Ollama Chat Generation</b></summary>
+<summary><b>POST /chat - Ollama Chat Generation</b></summary>
 
 Generate a chat response using Ollama models.
 
 **Request**
 - Method: POST
-- URL: `/api/v1/generate`
+- URL: `/api/v1/chat`
 - Content-Type: `application/json`
 
 **Request Body**
@@ -91,12 +91,12 @@ Generate a chat response using Ollama models.
 **Example Usage**
 ```bash
 # Minimal request (only required prompt)
-curl -X POST "http://localhost:8000/api/v1/generate" \
+curl -X POST "http://localhost:8000/api/v1/chat" \
 -H "Content-Type: application/json" \
 -d "{\"prompt\": \"What is Python?\"}"
 
 # Full request with all options
-curl -X POST "http://localhost:8000/api/v1/generate" \
+curl -X POST "http://localhost:8000/api/v1/chat" \
 -H "Content-Type: application/json" \
 -d "{
     \"prompt\": \"What is Python?\",

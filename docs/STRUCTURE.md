@@ -4,8 +4,11 @@ This document details the organization and purpose of each component in the Cont
 
 ## Overview
 
+<details>
+<summary>Backend Structure</summary>
+
 ```
-project-root/
+backend/
 ├── README.md                 # Project overview and setup instructions
 ├── docker-compose.yml        # Docker configuration
 ├── requirements.txt          # Python dependencies
@@ -29,107 +32,121 @@ project-root/
 │        ├── __init__.py
 │        ├── cors.py          # CORS configuration
 │        └── logger.py        # Logging configuration
-└── frontend/
-    ├── Dockerfile
-    ├── package.json
-    ├── src/
-    │   ├── components/
-    │   ├── pages/
-    │   ├── services/
-    │   └── utils/
-    └── scripts/
-        └── start.sh
 ```
 
-## Core Components
+### Core Backend Components
 
-### Main Application (`app/main.py`)
+#### Main Application (`app/main.py`)
 - FastAPI application initialization
 - Router registration
 - CORS and logging configuration
 - Server startup configuration
 
-### Language Models (`app/LLMs/`)
+#### Language Models (`app/LLMs/`)
+- **ollama_chat.py**: Chat interactions, response generation, system prompts
+- **ollama_embedding.py**: Document embedding, semantic search, ChromaDB integration
 
-#### `ollama_chat.py`
-- Handles chat interactions with Ollama models
-- Manages chat response generation
-- Supports system prompts and model switching
-- Includes error handling and logging
+#### API Endpoints (`app/api/v1/endpoints/`)
+- **hello_world.py**: Basic test endpoint, health checks
+- **ollama_chat_api.py**: Chat generation endpoints, model overrides
+- **ollama_embedding_api.py**: Document embedding, semantic search endpoints
 
-#### `ollama_embedding.py`
-- Manages document embedding creation
-- Handles semantic search functionality
-- Supports batch processing of documents
-- Integrates with ChromaDB for storage
+#### Handlers (`app/handlers/`)
+- **db_handler.py**: ChromaDB management, document storage/retrieval
 
-### API Endpoints (`app/api/v1/endpoints/`)
+#### Utilities (`app/utils/`)
+- **cors.py**: CORS middleware configuration
+- **logger.py**: Logging system configuration
 
-#### `hello_world.py`
-- Basic test endpoint
-- Demonstrates logging and error handling
-- Used for health checks
+</details>
 
-#### `ollama_chat_api.py`
-- Chat generation endpoints
-- Request/response models for chat
-- Model override capabilities
-- Error handling and logging
+<details>
+<summary>Frontend Structure</summary>
 
-#### `ollama_embedding_api.py`
-- Document embedding creation
-- Semantic search functionality
-- Batch processing endpoints
-- Integration with vector database
+```
+frontend/
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   ├── Chat/
+│   │   │   ├── ChatWindow.tsx
+│   │   │   ├── MessageList.tsx
+│   │   │   └── MessageInput.tsx
+│   │   ├── Search/
+│   │   │   ├── SearchBar.tsx
+│   │   │   └── SearchResults.tsx
+│   │   └── common/
+│   │       ├── Button.tsx
+│   │       ├── Input.tsx
+│   │       └── Loading.tsx
+│   ├── pages/              # Page components
+│   │   ├── Chat.tsx
+│   │   ├── Search.tsx
+│   │   └── Home.tsx
+│   ├── services/           # API integration
+│   │   ├── api.ts
+│   │   ├── chatService.ts
+│   │   └── searchService.ts
+│   ├── types/             # TypeScript interfaces
+│   │   ├── chat.ts
+│   │   └── search.ts
+│   ├── utils/             # Utility functions
+│   │   ├── constants.ts
+│   │   └── helpers.ts
+│   ├── App.tsx
+│   └── main.tsx
+```
 
-### Handlers (`app/handlers/`)
+### Core Frontend Components
 
-#### `db_handler.py`
-- ChromaDB vector database management
-- Document storage and retrieval
-- Embedding persistence
-- Query functionality
+#### Components (`src/components/`)
+- **Chat/**: Chat interface components
+  - ChatWindow: Main chat interface
+  - MessageList: Chat history display
+  - MessageInput: User input handling
+- **Search/**: Search functionality
+  - SearchBar: Query input
+  - SearchResults: Results display
+- **common/**: Reusable UI elements
 
-### Utilities (`app/utils/`)
+#### Pages (`src/pages/`)
+- **Chat.tsx**: Chat page layout and logic
+- **Search.tsx**: Search page layout and logic
+- **Home.tsx**: Landing page
 
-#### `cors.py`
-- CORS middleware configuration
-- Security settings for API access
+#### Services (`src/services/`)
+- **api.ts**: Axios configuration, base API setup
+- **chatService.ts**: Chat-related API calls
+- **searchService.ts**: Search-related API calls
 
-#### `logger.py`
-- Colored logging configuration
-- Debug mode support
-- Structured logging format
+#### Types (`src/types/`)
+- **chat.ts**: Chat-related interfaces
+- **search.ts**: Search-related interfaces
+
+#### Utils (`src/utils/`)
+- **constants.ts**: Global constants
+- **helpers.ts**: Utility functions
+
+</details>
 
 ## Key Features
 
-### Logging System
-- Colored output for different log levels
-- Debug mode toggle via environment variables
-- Structured logging format
-- Module-level logging configuration
-
-### Database Integration
-- Persistent vector storage with ChromaDB
-- Document embedding management
-- Efficient similarity search
-- Batch processing support
-
-### API Structure
+### Backend Features
+- Colored logging system with debug mode
+- ChromaDB vector database integration
 - Versioned API endpoints
-- Clear separation of concerns
-- Consistent error handling
-- Request/response validation
+- CORS and security configuration
 
-### Security
-- CORS configuration
-- Environment variable management
-- Error handling and logging
-- Input validation
+### Frontend Features
+- React 18+ with TypeScript
+- Vite for build tooling
+- Mantine UI components
+- React Query for API state
+- Axios for API requests
 
 ## Future Additions
 - Authentication system
 - Rate limiting
 - Additional model support
 - Enhanced search capabilities
-- Frontend integration
+- Real-time chat updates
+- Progressive Web App support
