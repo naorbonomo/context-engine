@@ -1,0 +1,41 @@
+/* Inherit base styles from ChatWindow.css */
+.chat-window {
+    height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.context-references {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+.context-references h4 {
+    margin: 0 0 8px 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.context-item {
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: white;
+    border-radius: 4px;
+    font-size: 0.85em;
+    border-left: 3px solid #007bff;
+}
+
+/* Message box modifications */
+.message-box.assistant {
+    background-color: #f8f9fa;
+    max-width: 88%;  /* Allow space for contexts */
+}
+
+.message-box {
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 8px;
+} 

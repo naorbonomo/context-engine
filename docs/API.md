@@ -210,6 +210,47 @@ curl -X POST "http://localhost:8000/api/v1/ollama-embeddings/search" \
 ```
 </details>
 
+<details>
+<summary><b>POST /document-chat - Document Chat Endpoint</b></summary>
+
+Chat with documents using context-aware responses.
+
+**Request**
+- Method: POST
+- URL: `/api/v1/document-chat`
+- Content-Type: `application/json`
+
+**Request Body**
+```json
+{
+    "query": "Your question about the documents",          // Required
+    "context": ["Document context 1", "Document context 2"], // Required
+    "max_tokens": 500                                     // Optional
+}
+```
+
+**Response**
+- Status: 200 OK
+- Content-Type: `application/json`
+
+```json
+{
+    "response": "AI-generated response based on document context",
+    "relevant_context": ["Used context pieces..."]
+}
+```
+
+**Example Usage**
+```bash
+curl -X POST "http://localhost:8000/api/v1/document-chat" \
+-H "Content-Type: application/json" \
+-d "{
+    \"query\": \"What does the document say about X?\",
+    \"context\": [\"Document text 1\", \"Document text 2\"]
+}"
+```
+</details>
+
 ## Status Codes
 
 The API uses the following standard HTTP status codes:

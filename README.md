@@ -5,15 +5,20 @@ A powerful context-aware search and retrieval system built with FastAPI and Reac
 
 ## 🚧 Project Status & Progress 🚧
 - ✅ Basic FastAPI backend structure
+- ✅ Vite React frontend setup
 - ✅ API - Hello World endpoint
 - ✅ API - Ollama Chat API endpoint
 - ✅ API - Ollama Embedding API endpoint
-- ✅ Vite React frontend setup
+- ✅ API - Document Chat API endpoint
+- ✅ Document Chat frontend component
+- ✅ LLM Prompting
 - 🔄 Frontend components development
 - 🔄 Database integration (ChromaDB)
 - ⏳ Authentication system pending
 - 🔄 Search functionality
-
+- ⏳ Chat History
+- ⏳ Context Sidebar
+ 
 
 ## Requirements
 

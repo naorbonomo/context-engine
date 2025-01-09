@@ -1,9 +1,10 @@
 import chromadb  # Import chromadb for vector database operations
 import json
 import os  # Import os for environment variables
+import ollama  # Import ollama for embedding
 from dotenv import load_dotenv  # Import dotenv to load environment variables
 from chromadb.api.models.Collection import Collection  # Correct import for Collection type
-import ollama  # Add this import
+from app.LLMs.ollama_chat import OllamaChat
 from app.utils.logger import get_logger  # Add this import
 
 load_dotenv()  # Load environment variables from .env file
@@ -24,6 +25,7 @@ class OllamaEmbeddings:
         self.collection = collection  # Store the ChromaDB collection
         self.model = default_model  # Store the model name
         self.client = ollama  # Initialize Ollama client
+        self.chat_handler = OllamaChat()
         logger.info(f"Initialized OllamaEmbeddings with model: {self.model}")
 
     def create_embedding(self, content: str) -> bool:
@@ -132,15 +134,14 @@ class OllamaEmbeddings:
         User question: {question}
         """.format(question=user_input)
         
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "system", "content": prompt}],
+        response = self.chat_handler.generate_response(
+            prompt=prompt,
             max_tokens=max_tokens,
-            temperature=0.3
-        )
+        )  # response is already a string from ollama_chat
         
-        queries = response.choices[0].message.content.strip().split('\n')
-        return [q.strip() for q in queries if q.strip()]  # Return cleaned queries
+        # Split the response string into a list of queries
+        queries = [q.strip() for q in response.split('\n') if q.strip()]
+        return queries
     
     def get_relevant_context(self, queries: list, top_k: int = 2) -> list:
         """
@@ -163,3 +164,63 @@ class OllamaEmbeddings:
         seen = set()
         unique_contexts = [x for x in all_contexts if not (x in seen or seen.add(x))]
         return unique_contexts 
+    
+    def analyze_context_sufficiency(self, context_list: list, user_input: str, max_tokens: int = 200) -> tuple[str, list]:
+        """
+        Analyze if the retrieved context is sufficient to answer the user's question.
+        
+        Args:
+            context_list (list): List of retrieved context passages
+            user_input (str): The user's original question
+            max_tokens (int, optional): Maximum tokens for response. Defaults to 200.
+            
+        Returns:
+            tuple[str, list]: Analysis result and list of additional queries if needed
+        """
+        analysis_prompt = """You are a lighting console expert. Review the retrieved context and the user's question. 
+        Look for any mentions of commands or features that need more detailed explanation.
+        
+        Specifically:
+        1. If a command is mentioned (like 'Label', 'Store', etc.), we MUST find its exact command line syntax
+           Example: "Label Group X 'name'" or "Store Group Y"
+        2. If a feature is mentioned, we need its specific location in the interface
+        3. If a process is mentioned, we need step-by-step instructions with exact button presses
+        
+        If any of these are missing, suggest specific search queries focused on command syntax.
+        If the context is completely sufficient with all details, respond with "SUFFICIENT".
+        
+        Example:
+        If context mentions "use the Label command" but doesn't show exact syntax, suggest queries like:
+        - Label command syntax examples grandMA2
+        - Label Group command line syntax
+        - grandMA2 command line Label Group exact syntax
+        
+        User question: {question}
+        
+        Retrieved context:
+        {context}
+        """.format(
+            question=user_input,
+            context='\n'.join(context_list)
+        )
+        
+        try:
+            response = self.chat_handler.generate_response(
+                prompt=analysis_prompt,
+                max_tokens=max_tokens,
+            )  # response is already a string from ollama_chat
+            
+            analysis = response.strip()  # Just clean up any whitespace
+            logger.debug(f"Context analysis: {analysis}")
+            
+            # Extract additional queries if context is insufficient
+            additional_queries = []
+            if "SUFFICIENT" not in analysis.upper():
+                additional_queries = [q.strip('- ') for q in analysis.split('\n') 
+                                   if q.strip().startswith('-')]
+            
+            return analysis, additional_queries
+            
+        except Exception as e:
+            logger.error(f"Error analyzing context: {str(e)}")
+            return "Error analyzing context", [] 
