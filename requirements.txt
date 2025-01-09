@@ -1,0 +1,13 @@
+uvicorn
+fastapi
+python-dotenv
+colorama
+ollama
+chromadb
+
+
+
+# installed but not used
+# pydantic
+# openai
+
