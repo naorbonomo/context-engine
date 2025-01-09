@@ -8,9 +8,9 @@ A powerful context-aware search and retrieval system built with FastAPI and Reac
 - ✅ API - Hello World endpoint
 - ✅ API - Ollama Chat API endpoint
 - ✅ API - Ollama Embedding API endpoint
-- ⏳ React frontend setup
-- ⏳ Frontend components development
-- ✅ Database integration (ChromaDB)
+- ✅ Vite React frontend setup
+- 🔄 Frontend components development
+- 🔄 Database integration (ChromaDB)
 - ⏳ Authentication system pending
 - 🔄 Search functionality
 
