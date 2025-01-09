@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { databaseService } from '../../services/databaseService';
 import './DatabaseWindow.css';
 
-export function DatabaseWindow() {
+export function UploadWindow() {
     const [content, setContent] = useState('');
     const [title, setTitle] = useState('');
 
@@ -27,7 +27,7 @@ export function DatabaseWindow() {
     return (
         <div className="database-window">
             <div className="database-content">
-                <h1>Context Engine Database</h1>
+                <h1>Upload Documents</h1>
                 <p className="description">Upload documents to enhance your AI's knowledge base</p>
 
                 <div className="input-group">
@@ -46,7 +46,7 @@ export function DatabaseWindow() {
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Paste your document content here..."
                         className="content-input"
-                        rows={15}
+                        rows={10}
                     />
                 </div>
 
@@ -59,15 +59,11 @@ export function DatabaseWindow() {
                 </button>
 
                 {uploadMutation.isSuccess && (
-                    <div className="success-message">
-                        Document uploaded successfully!
-                    </div>
+                    <div className="success-message">Document uploaded successfully!</div>
                 )}
 
                 {uploadMutation.isError && (
-                    <div className="error-message">
-                        Failed to upload document. Please try again.
-                    </div>
+                    <div className="error-message">Failed to upload document. Please try again.</div>
                 )}
             </div>
         </div>

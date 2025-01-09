@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ChatWindow } from './components/Chat/ChatWindow';
-import { DatabaseWindow } from './components/Database/DatabaseWindow';
+import { UploadWindow } from './components/Database/UploadWindow';
+import { SearchWindow } from './components/Database/SearchWindow';
 import { Navbar } from './components/Navbar/Navbar';
 import './styles/app.css';
 
@@ -14,7 +15,8 @@ function App() {
                 <Navbar />
                 <Routes>
                     <Route path="/chat" element={<ChatWindow />} />
-                    <Route path="/database" element={<DatabaseWindow />} />
+                    <Route path="/upload" element={<UploadWindow />} />
+                    <Route path="/search" element={<SearchWindow />} />
                     <Route path="/" element={<Navigate to="/chat" replace />} />
                 </Routes>
             </QueryClientProvider>

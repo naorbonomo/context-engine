@@ -16,10 +16,16 @@ export function Navbar() {
                         Chat
                     </Link>
                     <Link 
-                        to="/database" 
-                        className={`nav-link ${location.pathname === '/database' ? 'active' : ''}`}
+                        to="/upload" 
+                        className={`nav-link ${location.pathname === '/upload' ? 'active' : ''}`}
                     >
-                        Database
+                        Upload
+                    </Link>
+                    <Link 
+                        to="/search" 
+                        className={`nav-link ${location.pathname === '/search' ? 'active' : ''}`}
+                    >
+                        Search
                     </Link>
                 </div>
             </div>

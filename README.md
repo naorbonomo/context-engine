@@ -232,3 +232,16 @@ Explore our comprehensive documentation to get the most out of the Context Engin
 - [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Common issues and solutions
 - [Changelog](CHANGELOG.md) - Version history and updates
 - [License Information](LICENSE) - MIT License details
+
+## Database Features
+
+The application includes a document database with embedding capabilities:
+
+- **Document Upload**: Users can upload text documents that are automatically embedded using Ollama's embedding model
+- **Semantic Search**: Users can search through uploaded documents using natural language queries
+- **Real-time Results**: Search results are displayed instantly with relevant context matches
+
+To use these features:
+1. Navigate to the Database section
+2. Upload documents using the upload form
+3. Use the search bar to find relevant content across all uploaded documents
