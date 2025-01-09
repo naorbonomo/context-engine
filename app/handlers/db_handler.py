@@ -1,5 +1,5 @@
 import chromadb  # Import chromadb for vector database operations
-
+from chromadb.api.models.Collection import Collection  # Correct import for Collection type
 class DatabaseHandler:
     """Class to handle read and write operations with the ChromaDB vector database."""
 
@@ -13,7 +13,7 @@ class DatabaseHandler:
         self.client = chromadb.PersistentClient(path=db_path)  # Initialize PersistentClient
         self.collection = self._initialize_collection()  # Initialize or retrieve the collection
 
-    def _initialize_collection(self) -> chromadb.api.model.Collection:
+    def _initialize_collection(self) -> Collection:
         """
         Initialize and return the ChromaDB collection.
 

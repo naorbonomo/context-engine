@@ -4,8 +4,8 @@ python-dotenv
 colorama
 ollama
 chromadb
-
-
+pytest
+aiohttp
 
 # installed but not used
 # pydantic

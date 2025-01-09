@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException  # Import necessary FastAPI compone
 from typing import Optional  # Add this import at the top
 from pydantic import BaseModel  # Import BaseModel for request validation
 from app.LLMs.ollama_chat import OllamaChat  # Import the OllamaChat class
+from app.utils.logger import get_logger  # Add this import
 
 router = APIRouter(
     prefix="/api/v1",  # Set the prefix for all routes in this router
@@ -10,6 +11,8 @@ router = APIRouter(
 
 # Initialize OllamaChat with the desired model
 ollama_chat = OllamaChat()  # Initialize with default model
+
+logger = get_logger(__name__)  # Initialize logger for this module
 
 class ChatRequest(BaseModel):
     prompt: str  # The user's input prompt
@@ -20,7 +23,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str  # The generated chat response
 
-@router.post("/generate", response_model=ChatResponse)  # Fixed response_model syntax
+@router.post("/generate", response_model=ChatResponse)
 def generate_chat_response(request: ChatRequest):
     """
     Generate a chat response based on the provided prompts.
@@ -32,11 +35,13 @@ def generate_chat_response(request: ChatRequest):
         ChatResponse: The generated chat response.
     """
     try:
-        # Configure model if provided
+        logger.debug(f"Received chat request with model: {request.model}")
+        
         if request.model:
+            logger.info(f"Overriding default model with: {request.model}")
             ollama_chat.model = request.model
-            
-        # Generate response using OllamaChat instance
+        
+        logger.debug(f"Generating response for prompt: {request.prompt[:50]}...")
         response = ollama_chat.generate_response(
             prompt=request.prompt,  # User's prompt
             system_prompt=request.system_prompt,  # System's prompt
@@ -44,6 +49,11 @@ def generate_chat_response(request: ChatRequest):
             max_tokens=request.max_tokens  # Optional max tokens
         )
         
-        return ChatResponse(response=response)  # Return the response
+        logger.debug("Successfully generated response")
+        return ChatResponse(response=response)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))  # Handle exceptions 
+        logger.error(f"Chat generation error: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error generating chat response: {str(e)}"
+        )  # Handle exceptions 

@@ -7,12 +7,12 @@ A powerful context-aware search and retrieval system built with FastAPI and Reac
 - ✅ Basic FastAPI backend structure
 - ✅ API - Hello World endpoint
 - ✅ API - Ollama Chat API endpoint
-- 🔄 API - Ollama Embedding API endpoint
+- ✅ API - Ollama Embedding API endpoint
 - ⏳ React frontend setup
 - ⏳ Frontend components development
-- ⏳ Database integration pending
+- ✅ Database integration (ChromaDB)
 - ⏳ Authentication system pending
-- ⏳ Search functionality pending
+- 🔄 Search functionality
 
 
 ## Requirements
@@ -56,6 +56,8 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 ```
+
+For detailed environment variable configuration, see [Environment Variables Documentation](docs/ENV.md).
 
 
 ### Starting the Backend
@@ -172,3 +174,49 @@ The application implements comprehensive logging throughout its endpoints. Each 
 - ERROR level logging for exception handling
 
 Logs are created using Python's built-in logging module and can be configured through the application's logging configuration.
+
+### Features
+
+- **Chat Generation**: Interact with Ollama models for text generation
+- **Document Embeddings**: Create and store document embeddings using Ollama models
+- **Semantic Search**: Search through embedded documents using natural language queries
+- **Batch Processing**: Efficiently process multiple documents in batch
+- **Vector Database**: Integrated ChromaDB for efficient vector storage and retrieval
+
+### Testing
+
+Run the test suite with:
+```bash
+python -m pytest tests/
+```
+
+Key test areas include:
+- Chat API functionality
+- Embedding creation and retrieval
+- Search capabilities
+- Batch processing
+- Error handling
+
+## 📚 Documentation
+
+Explore our comprehensive documentation to get the most out of the Context Engine:
+
+### Core Documentation
+- [API Reference](docs/API.md) - Detailed API endpoints and usage
+- [Environment Setup](docs/ENV.md) - Configuration and environment variables
+- [Project Structure](docs/STRUCTURE.md) - Codebase organization and architecture
+
+### Guides and Tutorials
+- [Quick Start Guide](#quick-setup-guide) - Get up and running quickly
+- [Contributing Guidelines](docs/CONTRIBUTING.md) - How to contribute to the project
+- [Testing Guide](docs/TESTING.md) - Running and writing tests
+
+### Technical Details
+- [Database Schema](docs/DATABASE.md) - ChromaDB structure and usage
+- [Model Configuration](docs/MODELS.md) - Ollama models and settings
+- [Logging System](docs/LOGGING.md) - Logging configuration and debugging
+
+### Additional Resources
+- [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Changelog](CHANGELOG.md) - Version history and updates
+- [License Information](LICENSE) - MIT License details
