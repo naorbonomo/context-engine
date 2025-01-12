@@ -29,8 +29,29 @@ A powerful context-aware search and retrieval system built with FastAPI and Reac
 
 ## Quick Setup Guide
 
+### Automated Setup (Recommended)
+
+We provide automated setup scripts for both Windows and Unix-based systems:
+
+- Windows:
+```powershell
+.\setup.ps1
+```
+
+- Linux/MacOS:
+```bash
+./setup.sh
+```
+
+These scripts will:
+- Check and install required dependencies
+- Set up Python virtual environment
+- Install Python packages
+- Install Node.js packages
+- Start both frontend and backend servers
+
 <details>
-<summary><b>🔹 Backend Setup</b></summary>
+<summary><b>🔹 Manual Backend Setup</b></summary>
 
 1. Clone the repository:
 ```bash
@@ -88,11 +109,27 @@ chmod +x run.sh
 ### Available Endpoints
 The API will be available at:
 - API: http://localhost:8000/api/v1
-  - GET /hello - Test endpoint
+  - GET /hello - Returns a simple JSON greeting
+  - GET /hello-html - Returns a styled HTML greeting page
   - POST /chat - Chat generation endpoint
   - POST /ollama-embeddings/embed - Create document embeddings
   - POST /ollama-embeddings/search - Search through embeddings
 - [Detailed API Documentation](docs/API.md)
+
+#### Example Endpoints
+1. Basic JSON Greeting
+```bash
+curl http://localhost:8000/api/v1/hello
+```
+Response:
+```json
+{
+    "message": "Hello, World!"
+}
+```
+
+2. Styled HTML Greeting
+- Open http://localhost:8000/api/v1/hello-html in your browser to see a styled greeting page
 
 
 
