@@ -177,23 +177,8 @@ class OllamaEmbeddings:
         Returns:
             tuple[str, list]: Analysis result and list of additional queries if needed
         """
-        analysis_prompt = """You are a lighting console expert. Review the retrieved context and the user's question. 
+        analysis_prompt = """You are a documentation expert. Review the retrieved context and the user's question. 
         Look for any mentions of commands or features that need more detailed explanation.
-        
-        Specifically:
-        1. If a command is mentioned (like 'Label', 'Store', etc.), we MUST find its exact command line syntax
-           Example: "Label Group X 'name'" or "Store Group Y"
-        2. If a feature is mentioned, we need its specific location in the interface
-        3. If a process is mentioned, we need step-by-step instructions with exact button presses
-        
-        If any of these are missing, suggest specific search queries focused on command syntax.
-        If the context is completely sufficient with all details, respond with "SUFFICIENT".
-        
-        Example:
-        If context mentions "use the Label command" but doesn't show exact syntax, suggest queries like:
-        - Label command syntax examples grandMA2
-        - Label Group command line syntax
-        - grandMA2 command line Label Group exact syntax
         
         User question: {question}
         
@@ -224,3 +209,29 @@ class OllamaEmbeddings:
         except Exception as e:
             logger.error(f"Error analyzing context: {str(e)}")
             return "Error analyzing context", [] 
+    
+    def list_documents(self) -> list:
+        """
+        List all documents stored in the ChromaDB collection.
+
+        Returns:
+            list: A list of dictionaries containing document IDs and their content.
+        """
+        try:
+            # Get all documents from the collection
+            results = self.collection.get()
+            
+            # Format the results into a list of dictionaries
+            documents = []
+            for doc_id, content in zip(results['ids'], results['documents']):
+                documents.append({
+                    'id': doc_id,
+                    'content': content
+                })
+            
+            logger.info(f"Retrieved {len(documents)} documents from collection")
+            return documents
+            
+        except Exception as e:
+            logger.error(f"Error listing documents: {str(e)}")
+            return [] 

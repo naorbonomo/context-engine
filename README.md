@@ -18,6 +18,7 @@ A powerful context-aware search and retrieval system built with FastAPI and Reac
 - 🔄 Search functionality
 - ⏳ Chat History
 - ⏳ Context Sidebar
+- ✅ Document Viewer component
  
 
 ## Requirements
@@ -211,6 +212,7 @@ Logs are created using Python's built-in logging module and can be configured th
 - **Semantic Search**: Search through embedded documents using natural language queries
 - **Batch Processing**: Efficiently process multiple documents in batch
 - **Vector Database**: Integrated ChromaDB for efficient vector storage and retrieval
+- **Document Viewer**: Interactive component to view and expand stored documents
 
 ### Testing
 

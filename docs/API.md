@@ -251,6 +251,51 @@ curl -X POST "http://localhost:8000/api/v1/document-chat" \
 ```
 </details>
 
+<details>
+<summary><b>GET /api/v1/documents - List Documents</b></summary>
+
+Retrieve all documents stored in the database.
+
+**Request**
+- Method: GET
+- URL: `/api/v1/documents`
+- No parameters required
+
+**Response**
+- Status: 200 OK
+- Content-Type: `application/json`
+
+```json
+[
+    {
+        "id": "doc_0",
+        "content": "Document content..."
+    },
+    {
+        "id": "doc_1",
+        "content": "Another document content..."
+    }
+]
+```
+
+**Error Responses**
+- 500 Internal Server Error
+  ```json
+  {
+      "detail": "Error message"
+  }
+  ```
+
+**Example Usage**
+```bash
+# Using curl
+curl http://localhost:8000/api/v1/documents
+
+# Using httpie
+http GET http://localhost:8000/api/v1/documents
+```
+</details>
+
 ## Status Codes
 
 The API uses the following standard HTTP status codes:

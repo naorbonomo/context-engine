@@ -1,0 +1,44 @@
+.document-viewer { /* Container styling */
+    padding: 20px; /* Add padding around the viewer */
+    background-color: #1f2937; /* Dark background color */
+    color: #e5e7eb; /* Light text color */
+    min-height: 85vh; /* Ensure it takes up most of the viewport height */
+}
+
+.document-viewer h1 { /* Header styling */
+    margin-bottom: 1.5rem; /* Space below the header */
+    font-size: 2rem; /* Font size */
+    color: #60a5fa; /* Accent color for the header */
+}
+
+.document-list { /* List container */
+    list-style-type: none; /* Remove default list styling */
+    padding: 0; /* Remove padding */
+}
+
+.document-item { /* Individual document item */
+    padding: 10px; /* Add padding inside document items */
+    margin-bottom: 10px; /* Add space between document items */
+    background-color: #273548; /* Slightly different background */
+    border-radius: 5px; /* Round the corners */
+    border: 1px solid #ccc; /* Add border to each document item */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), /* Shadow effects */
+                0 4px 6px -2px rgba(0, 0, 0, 0.19);
+    transition: background-color 0.3s; /* Smooth background color transition */
+}
+
+.document-item:hover {
+    background-color: rgba(62, 65, 250, 0.2); /* Change background on hover */
+}
+
+.document-item h2 { /* Document ID styling */
+    margin-bottom: 0.5rem; /* Space below the ID */
+    font-size: 1.25rem; /* Font size */
+    color: #93c5fd; /* Lighter blue for the ID */
+}
+
+.document-item p { /* Document content styling */
+    font-size: 1rem; /* Font size */
+    color: #d1d5db; /* Light gray text */
+    white-space: pre-wrap; /* Preserve whitespace formatting */
+} 

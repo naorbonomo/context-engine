@@ -33,6 +33,12 @@ export function Navbar() {
                     >
                         Document Chat
                     </Link>
+                    <Link 
+                        to="/documents" 
+                        className={`nav-link ${location.pathname === '/documents' ? 'active' : ''}`}
+                    >
+                        View Documents
+                    </Link>
                 </div>
             </div>
         </nav>
