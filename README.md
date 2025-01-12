@@ -214,9 +214,21 @@ Logs are created using Python's built-in logging module and can be configured th
 
 ### Testing
 
-Run the test suite with:
+Run the test suite using the provided scripts:
+
+- Windows:
 ```bash
-python -m pytest tests/test_ollama_apis.py -v
+test.bat
+```
+
+- Linux/MacOS:
+```bash
+./test.sh
+```
+
+Note: Make sure to make the shell script executable on Unix systems:
+```bash
+chmod +x test.sh
 ```
 
 Key test areas include:
