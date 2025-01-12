@@ -8,4 +8,8 @@ export interface ChatResponse {
     message: string;
     model: string;
     timestamp: Date;
+}
+
+export interface AutocompleteResponse {
+    suggestion: string;
 } 

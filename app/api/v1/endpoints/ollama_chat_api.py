@@ -23,6 +23,14 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str  # The generated chat response
 
+class AutocompleteRequest(BaseModel):
+    partial_prompt: str  # The incomplete text to generate suggestions for
+    model: Optional[str] = None  # Optional model override
+    max_tokens: Optional[int] = 50  # Number of tokens to predict, defaults to 50
+
+class AutocompleteResponse(BaseModel):
+    suggestion: str  # The generated completion suggestion
+
 @router.post("/chat", response_model=ChatResponse)
 def chat_response(request: ChatRequest):
     """
@@ -56,4 +64,33 @@ def chat_response(request: ChatRequest):
         raise HTTPException(
             status_code=500, 
             detail=f"Error generating chat response: {str(e)}"
+        )  # Handle exceptions 
+
+@router.post("/autocomplete", response_model=AutocompleteResponse)
+def generate_autocomplete(request: AutocompleteRequest):
+    """
+    Generate text completion suggestions for a partial prompt.
+
+    Args:
+        request (AutocompleteRequest): The request containing the partial prompt and optional parameters.
+
+    Returns:
+        AutocompleteResponse: The generated completion suggestion.
+    """
+    try:
+        logger.debug(f"Received autocomplete request with model: {request.model}")
+        
+        suggestion = ollama_chat.generate_autocomplete(
+            partial_prompt=request.partial_prompt,
+            max_tokens=request.max_tokens,
+            model=request.model
+        )
+        
+        logger.debug("Successfully generated autocomplete suggestion")
+        return AutocompleteResponse(suggestion=suggestion)
+    except Exception as e:
+        logger.error(f"Autocomplete generation error: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error generating autocomplete suggestion: {str(e)}"
         )  # Handle exceptions 
