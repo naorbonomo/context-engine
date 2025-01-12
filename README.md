@@ -67,9 +67,21 @@ For detailed environment variable configuration, see [Environment Variables Docu
 
 ### Starting the Backend
 
-Start the FastAPI backend with:
+You can start the backend server using the provided scripts:
+
+- Windows:
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+run.bat
+```
+
+- Linux/MacOS:
+```bash
+./run.sh
+```
+
+Note: Make sure to make the shell script executable on Unix systems:
+```bash
+chmod +x run.sh
 ```
 
 ### Available Endpoints
@@ -204,7 +216,7 @@ Logs are created using Python's built-in logging module and can be configured th
 
 Run the test suite with:
 ```bash
-python -m pytest tests/
+python -m pytest tests/test_ollama_apis.py -v
 ```
 
 Key test areas include:
