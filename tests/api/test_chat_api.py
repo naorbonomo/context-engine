@@ -32,7 +32,7 @@ class TestOllamaChatAPI(unittest.TestCase):
             "model": self.model
         }
         
-        status, data = await self._make_request("generate", payload)
+        status, data = await self._make_request("chat", payload)
         return status, data
 
     def test_chat_generation(self):
@@ -52,7 +52,7 @@ class TestOllamaChatAPI(unittest.TestCase):
             "model": "invalid_model_name"
         }
         
-        status, _ = await self._make_request("generate", payload)
+        status, _ = await self._make_request("chat", payload)
         return status
 
     def test_invalid_model(self):
