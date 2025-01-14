@@ -12,6 +12,7 @@ A powerful context-aware search and retrieval system built with FastAPI and Reac
 - ✅ API - Document Chat API endpoint
 - ✅ Document Chat frontend component
 - ✅ LLM Prompting
+- ✅ Multiple LLM Providers Support
 - 🔄 Frontend components development
 - 🔄 Database integration (ChromaDB)
 - ⏳ Authentication system pending
@@ -20,6 +21,90 @@ A powerful context-aware search and retrieval system built with FastAPI and Reac
 - ⏳ Context Sidebar
 - ✅ Document Viewer component
  
+
+## New Features: Multi-Provider LLM Support
+
+### Available Providers
+- **Ollama** (Default for embeddings and fallback)
+  - Local deployment
+  - Multiple models support
+  - Used for embeddings and as fallback
+
+- **Gemini** (Google)
+  - Fast response times
+  - Good for general chat
+  - Requires Google API key
+
+- **OpenAI**
+  - GPT-3.5 and GPT-4 support
+  - High quality responses
+  - Requires OpenAI API key
+
+- **Groq**
+  - High-performance inference
+  - Low latency
+  - Requires Groq API key
+
+### Configuration
+Add to your `.env` file:
+```env
+#---LLM Defaults---
+DEFAULT_CHAT_PROVIDER=groq  # Options: ollama, gemini, openai, groq
+DEFAULT_AUTOCOMPLETE_PROVIDER=ollama
+
+#---API Keys---
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-4
+
+GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-pro
+
+GROQ_API_KEY=your_key_here
+GROQ_MODEL=mixtral-8x7b-32768
+
+OLLAMA_MODEL=your_model_here
+OLLAMA_EMBEDDING_MODEL=snowflake-arctic-embed2
+```
+
+### New Dependencies
+```bash
+# Install required packages
+pip install google-generativeai  # For Gemini
+pip install openai              # For OpenAI
+pip install groq                # For Groq
+```
+
+### API Usage Examples
+```python
+# Chat with default provider
+POST /api/v1/chat
+{
+    "prompt": "Hello, how are you?",
+    "system_prompt": "Optional system prompt"
+}
+
+# Chat with specific provider
+POST /api/v1/chat
+{
+    "prompt": "Hello, how are you?",
+    "provider": "groq",
+    "model": "mixtral-8x7b-32768"
+}
+
+# Document chat with provider selection
+POST /api/v1/document-chat
+{
+    "messages": [{"role": "user", "content": "What do the docs say about X?"}],
+    "provider": "gemini",
+    "top_k": 5
+}
+```
+
+### Error Handling
+- Automatic fallback to Ollama if primary provider fails
+- Detailed error logging for API issues
+- Environment validation for required API keys
+- Graceful degradation of services
 
 ## Requirements
 
@@ -111,7 +196,8 @@ The API will be available at:
 - API: http://localhost:8000/api/v1
   - GET /hello - Returns a simple JSON greeting
   - GET /hello-html - Returns a styled HTML greeting page
-  - POST /chat - Chat generation endpoint
+  - POST /chat - Multi-provider chat generation
+  - POST /autocomplete - Smart text completion
   - POST /ollama-embeddings/embed - Create document embeddings
   - POST /ollama-embeddings/search - Search through embeddings
 - [Detailed API Documentation](docs/API.md)

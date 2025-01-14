@@ -4,7 +4,7 @@ import os  # Import os for environment variables
 import ollama  # Import ollama for embedding
 from dotenv import load_dotenv  # Import dotenv to load environment variables
 from chromadb.api.models.Collection import Collection  # Correct import for Collection type
-from app.LLMs.ollama_chat import OllamaChat
+from app.LLMs.llm_factory import LLMFactory  # Update import
 from app.utils.logger import get_logger  # Add this import
 
 load_dotenv()  # Load environment variables from .env file
@@ -25,7 +25,8 @@ class OllamaEmbeddings:
         self.collection = collection  # Store the ChromaDB collection
         self.model = default_model  # Store the model name
         self.client = ollama  # Initialize Ollama client
-        self.chat_handler = OllamaChat()
+        # Use LLMFactory instead of direct OllamaChat instantiation
+        self.chat_handler = LLMFactory.create_llm(os.getenv('DEFAULT_CHAT_PROVIDER'))
         logger.info(f"Initialized OllamaEmbeddings with model: {self.model}")
 
     def create_embedding(self, content: str) -> bool:
@@ -66,7 +67,7 @@ class OllamaEmbeddings:
         Returns:
             list: A list of relevant context documents.
         """
-        print(f"Searching for: {query}")  # Print the search query
+        logger.debug(f"Searching for: {query}")  # Changed to debug level
         query_embedding = self.client.embeddings(model=self.model, prompt=query)["embedding"]  # Get query embedding
         
         results = self.collection.query(
@@ -137,7 +138,7 @@ class OllamaEmbeddings:
         response = self.chat_handler.generate_response(
             prompt=prompt,
             max_tokens=max_tokens,
-        )  # response is already a string from ollama_chat
+        )
         
         # Split the response string into a list of queries
         queries = [q.strip() for q in response.split('\n') if q.strip()]
@@ -193,7 +194,7 @@ class OllamaEmbeddings:
             response = self.chat_handler.generate_response(
                 prompt=analysis_prompt,
                 max_tokens=max_tokens,
-            )  # response is already a string from ollama_chat
+            )
             
             analysis = response.strip()  # Just clean up any whitespace
             logger.debug(f"Context analysis: {analysis}")

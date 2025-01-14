@@ -2,12 +2,13 @@ import os
 from dotenv import load_dotenv
 import ollama  # Import Ollama for chat completions
 from app.utils.logger import get_logger  # Add this import
+from app.LLMs.base_llm import BaseLLM  # Add this import
 
 load_dotenv()
 
 logger = get_logger(__name__)  # Initialize logger for this module
 
-class OllamaChat:
+class OllamaChat(BaseLLM):
     """Class to handle chat interactions using Ollama."""
 
     def __init__(self, default_model: str = os.getenv('OLLAMA_MODEL')):
@@ -41,8 +42,7 @@ class OllamaChat:
             
             # Verify model exists
             try:
-                # You might want to add a model verification step here
-                print(f"Using model: {model_name}")
+                logger.info(f"Using model: {model_name}")
             except Exception as model_error:
                 raise Exception(f"Model verification failed: {str(model_error)}")
 

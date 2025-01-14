@@ -68,3 +68,4 @@ frontend/.vite/
 # IDE
 .cursorrules
 .vscode
+directory_structure.py

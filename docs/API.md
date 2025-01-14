@@ -51,9 +51,9 @@ http GET http://localhost:8000/api/v1/hello
 </details>
 
 <details>
-<summary><b>POST /chat - Ollama Chat Generation</b></summary>
+<summary><b>POST /chat - Multi-Provider Chat Generation</b></summary>
 
-Generate a chat response using Ollama models.
+Generate a chat response using multiple LLM providers.
 
 **Request**
 - Method: POST
@@ -65,8 +65,9 @@ Generate a chat response using Ollama models.
 {
     "prompt": "What is Python?",                           // Required
     "system_prompt": "You are a helpful assistant",        // Optional
-    "model": "mistral",                                   // Optional
-    "max_tokens": 500                                     // Optional
+    "model": "mixtral-8x7b-32768",                        // Optional
+    "max_tokens": 500,                                     // Optional
+    "provider": "groq"                                     // Optional (defaults to DEFAULT_CHAT_PROVIDER)
 }
 ```
 
@@ -90,27 +91,26 @@ Generate a chat response using Ollama models.
 
 **Example Usage**
 ```bash
-# Minimal request (only required prompt)
+# Using default provider
 curl -X POST "http://localhost:8000/api/v1/chat" \
 -H "Content-Type: application/json" \
 -d "{\"prompt\": \"What is Python?\"}"
 
-# Full request with all options
+# Using specific provider
 curl -X POST "http://localhost:8000/api/v1/chat" \
 -H "Content-Type: application/json" \
 -d "{
     \"prompt\": \"What is Python?\",
-    \"system_prompt\": \"You are a helpful programming assistant.\",
-    \"model\": \"mistral\",
+    \"provider\": \"groq\",
+    \"model\": \"mixtral-8x7b-32768\",
     \"max_tokens\": 500
 }"
 ```
 
 **Notes**
-- Default model is set via OLLAMA_MODEL environment variable
-- Models must be pulled using Ollama CLI before use (e.g., `ollama pull mistral`)
-- System prompt helps set the context for the AI response
-- Max tokens parameter can limit response length
+- Default provider is set via DEFAULT_CHAT_PROVIDER environment variable
+- Supports multiple providers: Groq, OpenAI, Gemini, Ollama
+- Automatic fallback to Ollama if primary provider fails
 </details>
 
 <details>

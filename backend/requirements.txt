@@ -6,8 +6,9 @@ ollama
 chromadb
 pytest
 aiohttp
-
+openai
+groq
+google-generativeai
 # installed but not used
 # pydantic
-# openai
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from pydantic import BaseModel
-from app.LLMs.ollama_chat import OllamaChat
+from app.LLMs.llm_factory import LLMFactory
 from app.LLMs.ollama_embedding import OllamaEmbeddings
 from app.handlers.db_handler import DatabaseHandler
 from app.utils.logger import get_logger
@@ -19,7 +19,8 @@ router = APIRouter(
 # Initialize handlers
 try:
     db_handler = DatabaseHandler()
-    chat_handler = OllamaChat()
+    # Use LLMFactory instead of direct OllamaChat instantiation
+    chat_handler = LLMFactory.create_llm(os.getenv('DEFAULT_CHAT_PROVIDER'))
     embedder = OllamaEmbeddings(
         collection=db_handler.collection,
         default_model=os.getenv('OLLAMA_EMBEDDING_MODEL')
@@ -32,10 +33,12 @@ class DocumentChatRequest(BaseModel):
     messages: List[dict]  # Chat history
     top_k: Optional[int] = 5  # Number of relevant contexts to retrieve
     model: Optional[str] = None  # Optional model override
+    provider: Optional[str] = None  # Add provider field
 
 class DocumentChatResponse(BaseModel):
     response: str  # The generated chat response
     contexts: List[str]  # The relevant document contexts used
+    provider: str  # Add provider field to show which LLM was used
 
 @router.post("/document-chat", response_model=DocumentChatResponse)
 async def document_chat(request: DocumentChatRequest):
@@ -44,12 +47,16 @@ async def document_chat(request: DocumentChatRequest):
     Uses a multi-query approach with context analysis for better results.
     
     Args:
-        request (DocumentChatRequest): Contains messages history and search parameters
+        request (DocumentChatRequest): Contains messages history, search parameters, and provider
     
     Returns:
-        DocumentChatResponse: AI response and relevant document contexts
+        DocumentChatResponse: AI response, relevant document contexts, and provider used
     """
     try:
+        # Get chat handler for requested provider or use default
+        chat_handler = LLMFactory.create_llm(request.provider, operation="chat")
+        logger.info(f"Using provider: {type(chat_handler).__name__}")
+
         # Get the latest user message
         current_query = request.messages[-1]["content"]
         logger.debug(f"Processing query: {current_query[:50]}...")
@@ -89,17 +96,16 @@ async def document_chat(request: DocumentChatRequest):
         ])
 
         # Generate response using chat
-        if request.model:
-            chat_handler.model = request.model
-            
         response = chat_handler.generate_response(
             prompt=current_query,
-            system_prompt=context_prompt
+            system_prompt=context_prompt,
+            model=request.model
         )
 
         return DocumentChatResponse(
             response=response,
-            contexts=relevant_context
+            contexts=relevant_context,
+            provider=type(chat_handler).__name__.replace('Chat', '').lower()  # Extract provider name
         )
 
     except Exception as e:
