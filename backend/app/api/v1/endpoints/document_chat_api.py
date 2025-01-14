@@ -2,11 +2,12 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from pydantic import BaseModel
 from app.LLMs.llm_factory import LLMFactory
-from app.LLMs.ollama_embedding import OllamaEmbeddings
+from app.LLMs.embedding_factory import EmbeddingFactory
 from app.handlers.db_handler import DatabaseHandler
 from app.utils.logger import get_logger
 import os
 from dotenv import load_dotenv
+from app.handlers.context_handler import ContextHandler
 
 load_dotenv()
 logger = get_logger(__name__)
@@ -21,9 +22,9 @@ try:
     db_handler = DatabaseHandler()
     # Use LLMFactory instead of direct OllamaChat instantiation
     chat_handler = LLMFactory.create_llm(os.getenv('DEFAULT_CHAT_PROVIDER'))
-    embedder = OllamaEmbeddings(
-        collection=db_handler.collection,
-        default_model=os.getenv('OLLAMA_EMBEDDING_MODEL')
+    embedder = EmbeddingFactory.create_embedder(
+        provider=os.getenv('DEFAULT_EMBEDDING_PROVIDER'),
+        collection=db_handler.collection
     )
 except Exception as e:
     logger.error(f"Error initializing handlers: {str(e)}")
@@ -61,32 +62,14 @@ async def document_chat(request: DocumentChatRequest):
         current_query = request.messages[-1]["content"]
         logger.debug(f"Processing query: {current_query[:50]}...")
 
-        # Generate multiple search queries
-        logger.debug("Generating search queries...")
-        queries = embedder.get_multiple_queries(current_query)
+        # Initialize context handler
+        context_handler = ContextHandler(embedder)
         
-        # Get initial context
-        relevant_context = embedder.get_relevant_context(
-            queries=queries,
+        # Get relevant context
+        relevant_context = context_handler.get_document_context(
+            query=current_query,
             top_k=request.top_k
         )
-        
-        # Analyze context sufficiency
-        if relevant_context:
-            analysis, additional_queries = embedder.analyze_context_sufficiency(
-                context_list=relevant_context,
-                user_input=current_query
-            )
-            
-            logger.debug(f"Context analysis: {analysis}")
-            
-            # If context is insufficient and we have additional queries, get more context
-            if additional_queries:
-                additional_context = embedder.get_relevant_context(
-                    queries=additional_queries,
-                    top_k=request.top_k
-                )
-                relevant_context.extend(additional_context)
         
         # Construct system prompt with context
         context_prompt = "\n".join([

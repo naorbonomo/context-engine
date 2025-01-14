@@ -6,26 +6,18 @@ from dotenv import load_dotenv  # Import dotenv to load environment variables
 from chromadb.api.models.Collection import Collection  # Correct import for Collection type
 from app.LLMs.llm_factory import LLMFactory  # Update import
 from app.utils.logger import get_logger  # Add this import
+from app.LLMs.base_embedding import BaseEmbedding
 
 load_dotenv()  # Load environment variables from .env file
 
 logger = get_logger(__name__)  # Initialize logger for this module
 
-class OllamaEmbeddings:
+class OllamaEmbeddings(BaseEmbedding):
     """Class to handle embedding creation using Ollama."""
 
-    def __init__(self, collection: Collection, default_model: str = os.getenv('OLLAMA_EMBEDDING_MODEL')):
-        """
-        Initialize the OllamaEmbed with a specific model and client.
-
-        Args:
-            model (str): The Ollama model to use for embeddings.
-            collection: The ChromaDB collection instance.
-        """
-        self.collection = collection  # Store the ChromaDB collection
-        self.model = default_model  # Store the model name
-        self.client = ollama  # Initialize Ollama client
-        # Use LLMFactory instead of direct OllamaChat instantiation
+    def __init__(self, collection: Collection, default_model: str):
+        super().__init__(collection, default_model)
+        self.client = ollama
         self.chat_handler = LLMFactory.create_llm(os.getenv('DEFAULT_CHAT_PROVIDER'))
         logger.info(f"Initialized OllamaEmbeddings with model: {self.model}")
 

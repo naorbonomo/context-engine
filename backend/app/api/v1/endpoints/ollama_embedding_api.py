@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
-from app.LLMs.ollama_embedding import OllamaEmbeddings
+from app.LLMs.embedding_factory import EmbeddingFactory
 from app.handlers.db_handler import DatabaseHandler
 
 load_dotenv()
@@ -16,9 +16,9 @@ router = APIRouter(
 # Initialize handlers with error handling
 try:
     db_handler = DatabaseHandler()  # Initialize with default path
-    embedder = OllamaEmbeddings(
-        collection=db_handler.collection,
-        default_model=os.getenv('OLLAMA_EMBEDDING_MODEL')
+    embedder = EmbeddingFactory.create_embedder(
+        provider=os.getenv('DEFAULT_EMBEDDING_PROVIDER'),
+        collection=db_handler.collection
     )
 except Exception as e:
     print(f"Error initializing handlers: {str(e)}")
