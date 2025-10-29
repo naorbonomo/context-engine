@@ -9,6 +9,9 @@ aiohttp
 openai
 groq
 google-generativeai
+PyPDF2
+pymupdf
+python-multipart
 # installed but not used
 # pydantic
 

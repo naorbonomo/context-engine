@@ -71,17 +71,32 @@ async def document_chat(request: DocumentChatRequest):
             top_k=request.top_k
         )
         
-        # Construct system prompt with context
-        context_prompt = "\n".join([
-            "Relevant document contexts:",
-            *[f"- {ctx}" for ctx in relevant_context],
-            "\nAnswer the user's question based on the above contexts. If the contexts don't contain relevant information, say so."
-        ])
+        # Enhanced system prompt for user manual RAG experience
+        system_prompt = f"""You are a technical support assistant for the GrandMA3 lighting console. You have access to the official user manual and should provide accurate, helpful responses based on the documentation.
+
+IMPORTANT GUIDELINES:
+1. **Always base your answers on the provided manual excerpts** - if the context doesn't contain relevant information, clearly state this
+2. **Provide structured, step-by-step instructions** when explaining procedures
+3. **Include specific page references or section names** when possible
+4. **Use technical terminology accurately** as defined in the manual
+5. **If a user asks about features not covered in the provided context, suggest they check other sections of the manual**
+
+RELEVANT MANUAL EXCERPTS:
+{chr(10).join([f"• {ctx}" for ctx in relevant_context])}
+
+RESPONSE FORMAT:
+- Start with a direct answer to the user's question
+- Reference specific manual sections when applicable
+- Provide step-by-step instructions if explaining a procedure
+- Include any important warnings or notes from the manual
+- If the context is insufficient, suggest what additional information might be needed
+
+Remember: You are helping users understand and operate the GrandMA3 console safely and effectively."""
 
         # Generate response using chat
         response = chat_handler.generate_response(
             prompt=current_query,
-            system_prompt=context_prompt,
+            system_prompt=system_prompt,
             model=request.model
         )
 
