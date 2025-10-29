@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Message } from '../../types/chat';
-import { useMutation } from '@tanstack/react-query';
 import { documentChatService } from '../../services/documentChatService';
 import './DocumentChat.css';
 
@@ -15,30 +14,42 @@ export function DocumentChat() {
     const [relevantContexts, setRelevantContexts] = useState<string[]>([]); // Store retrieved contexts
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [currentStreamingMessage, setCurrentStreamingMessage] = useState<string>('');
+    const [currentProvider, setCurrentProvider] = useState<string>('');
+    const [isThinking, setIsThinking] = useState(false);
+    const [thinkingContent, setThinkingContent] = useState<string>('');
+    const [useEventSource, setUseEventSource] = useState(false); // Toggle between methods
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const eventSourceCleanupRef = useRef<(() => void) | null>(null);
 
-    const chatMutation = useMutation({
-        mutationFn: documentChatService.sendMessage,
-        onMutate: () => setIsLoading(true),
-        onSettled: () => setIsLoading(false),
-        onSuccess: (response) => {
-            setMessages(prev => [...prev, {
-                role: 'assistant',
-                content: response.response,
-                timestamp: new Date()
-            }]);
-            // Update relevant contexts from the response
-            if (response.contexts) {
-                setRelevantContexts(response.contexts);
-            }
-        },
-        onError: (error) => {
-            setError('Failed to get response. Please try again.');
-            setTimeout(() => setError(null), 3000);
-        },
-    });
+    // Function to parse and handle thinking content
+    const handleStreamingContent = (content: string) => {
+        if (content.includes('<think>')) {
+            setIsThinking(true);
+            // Extract content after <think> tag
+            const thinkStart = content.indexOf('<think>') + 7;
+            const remainingContent = content.substring(thinkStart);
+            setThinkingContent(prev => prev + remainingContent);
+        } else if (content.includes('</think>')) {
+            setIsThinking(false);
+            // Extract content before </think> tag
+            const thinkEnd = content.indexOf('</think>');
+            const beforeThinkEnd = content.substring(0, thinkEnd);
+            setThinkingContent(prev => prev + beforeThinkEnd);
+            // Clear thinking content and add to streaming message
+            setCurrentStreamingMessage(prev => prev + thinkingContent + beforeThinkEnd);
+            setThinkingContent('');
+        } else if (isThinking) {
+            // Add to thinking content
+            setThinkingContent(prev => prev + content);
+        } else {
+            // Add to regular streaming message
+            setCurrentStreamingMessage(prev => prev + content);
+        }
+    };
 
-    const handleSend = () => {
-        if (!input.trim()) return;
+    const handleSend = async () => {
+        if (!input.trim() || isLoading) return;
 
         const newMessage: Message = {
             role: 'user',
@@ -47,20 +58,147 @@ export function DocumentChat() {
         };
 
         setMessages(prev => [...prev, newMessage]);
-        chatMutation.mutate({
+        setInput('');
+        setIsLoading(true);
+        setError(null);
+        setCurrentStreamingMessage('');
+        setCurrentProvider('');
+        setIsThinking(false);
+        setThinkingContent('');
+
+        const streamingRequest = {
             messages: [...messages, newMessage],
             top_k: 5, // Number of relevant contexts to retrieve
-        });
-        setInput('');
+        };
+
+        try {
+            if (useEventSource) {
+                // Use EventSource approach
+                const cleanup = documentChatService.sendStreamingMessageWithEventSource(
+                    streamingRequest,
+                    // onToken callback
+                    (token: string) => {
+                        if (token && token.trim()) {
+                            handleStreamingContent(token);
+                        }
+                    },
+                    // onContext callback
+                    (contexts: string[], provider: string) => {
+                        setRelevantContexts(contexts);
+                        setCurrentProvider(provider);
+                    },
+                    // onComplete callback
+                    () => {
+                        if (currentStreamingMessage.trim()) {
+                            setMessages(prev => [...prev, {
+                                role: 'assistant',
+                                content: currentStreamingMessage,
+                                timestamp: new Date()
+                            }]);
+                        }
+                        setCurrentStreamingMessage('');
+                        setIsLoading(false);
+                        setIsThinking(false);
+                        setThinkingContent('');
+                    },
+                    // onError callback
+                    (errorMessage: string) => {
+                        setError(errorMessage);
+                        setIsLoading(false);
+                        setCurrentStreamingMessage('');
+                        setIsThinking(false);
+                        setThinkingContent('');
+                    }
+                );
+                
+                eventSourceCleanupRef.current = cleanup;
+            } else {
+                // Use fetch approach
+                abortControllerRef.current = new AbortController();
+
+                await documentChatService.sendStreamingMessage(
+                    streamingRequest,
+                    // onToken callback
+                    (token: string) => {
+                        if (token && token.trim()) {
+                            handleStreamingContent(token);
+                        }
+                    },
+                    // onContext callback
+                    (contexts: string[], provider: string) => {
+                        setRelevantContexts(contexts);
+                        setCurrentProvider(provider);
+                    },
+                    // onComplete callback
+                    () => {
+                        if (currentStreamingMessage.trim()) {
+                            setMessages(prev => [...prev, {
+                                role: 'assistant',
+                                content: currentStreamingMessage,
+                                timestamp: new Date()
+                            }]);
+                        }
+                        setCurrentStreamingMessage('');
+                        setIsLoading(false);
+                        setIsThinking(false);
+                        setThinkingContent('');
+                    },
+                    // onError callback
+                    (errorMessage: string) => {
+                        setError(errorMessage);
+                        setIsLoading(false);
+                        setCurrentStreamingMessage('');
+                        setIsThinking(false);
+                        setThinkingContent('');
+                    }
+                );
+            }
+        } catch (error) {
+            setError('Failed to get response. Please try again.');
+            setIsLoading(false);
+            setCurrentStreamingMessage('');
+            setIsThinking(false);
+            setThinkingContent('');
+        }
+    };
+
+    const handleCancel = () => {
+        if (useEventSource && eventSourceCleanupRef.current) {
+            eventSourceCleanupRef.current();
+            eventSourceCleanupRef.current = null;
+        } else if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        setIsLoading(false);
+        setCurrentStreamingMessage('');
+        setIsThinking(false);
+        setThinkingContent('');
     };
 
     return (
         <div className="chat-window">
+            <div className="chat-header">
+                <h1>Document Assistant</h1>
+                <div className="streaming-toggle">
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={useEventSource}
+                            onChange={(e) => setUseEventSource(e.target.checked)}
+                            disabled={isLoading}
+                        />
+                        Use EventSource (simpler method)
+                    </label>
+                </div>
+            </div>
+            
             <div className="messages-container">
-                {messages.length === 0 ? (
+                {messages.length === 0 && !isLoading ? (
                     <div className="welcome-message">
-                        <h1>Document Assistant</h1>
                         <p>Ask questions about your documents and get AI-powered answers</p>
+                        <p className="method-info">
+                            Currently using: <strong>{useEventSource ? 'EventSource' : 'Fetch'}</strong> streaming
+                        </p>
                     </div>
                 ) : (
                     <>
@@ -71,6 +209,9 @@ export function DocumentChat() {
                             >
                                 <div className="message-header">
                                     {msg.role === 'user' ? 'You' : 'Assistant'}
+                                    {msg.role === 'assistant' && currentProvider && (
+                                        <span className="provider-badge">({currentProvider})</span>
+                                    )}
                                 </div>
                                 <div className="message-text">
                                     {msg.content}
@@ -87,11 +228,58 @@ export function DocumentChat() {
                                 )}
                             </div>
                         ))}
-                        {isLoading && (
-                            <div className="message-box assistant loading">
-                                <div className="loading-indicator">Thinking...</div>
+                        
+                        {/* Show streaming message */}
+                        {isLoading && (currentStreamingMessage || thinkingContent) && (
+                            <div className="message-box assistant streaming">
+                                <div className="message-header">
+                                    Assistant
+                                    {currentProvider && (
+                                        <span className="provider-badge">({currentProvider})</span>
+                                    )}
+                                </div>
+                                
+                                {/* Show thinking content if available */}
+                                {thinkingContent && (
+                                    <div className="thinking-content">
+                                        <div className="thinking-header">
+                                            <span className="thinking-icon">🧠</span>
+                                            <span>Thinking Process</span>
+                                        </div>
+                                        <div className="thinking-text">
+                                            {thinkingContent}
+                                            {isThinking && <span className="cursor">|</span>}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Show streaming response */}
+                                {currentStreamingMessage && (
+                                    <div className="message-text">
+                                        {currentStreamingMessage}
+                                        {!isThinking && <span className="cursor">|</span>}
+                                    </div>
+                                )}
+                                
+                                {relevantContexts.length > 0 && (
+                                    <div className="context-references">
+                                        <h4>Referenced from:</h4>
+                                        {relevantContexts.map((context, idx) => (
+                                            <div key={idx} className="context-item">
+                                                {context}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
+                        
+                        {isLoading && !currentStreamingMessage && !thinkingContent && (
+                            <div className="message-box assistant loading">
+                                <div className="loading-indicator">Processing...</div>
+                            </div>
+                        )}
+                        
                         {error && <div className="error-message">{error}</div>}
                     </>
                 )}
@@ -110,14 +298,24 @@ export function DocumentChat() {
                     }}
                     rows={1}
                     className="message-input"
+                    disabled={isLoading}
                 />
-                <button 
-                    onClick={handleSend}
-                    disabled={chatMutation.isPending}
-                    className="send-button"
-                >
-                    {chatMutation.isPending ? 'Processing...' : 'Send'}
-                </button>
+                {isLoading ? (
+                    <button 
+                        onClick={handleCancel}
+                        className="cancel-button"
+                    >
+                        Cancel
+                    </button>
+                ) : (
+                    <button 
+                        onClick={handleSend}
+                        disabled={!input.trim()}
+                        className="send-button"
+                    >
+                        Send
+                    </button>
+                )}
             </div>
         </div>
     );

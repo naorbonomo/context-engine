@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import ollama  # Import Ollama for chat completions
 from app.utils.logger import get_logger  # Add this import
 from app.LLMs.base_llm import BaseLLM  # Add this import
+from typing import Generator
 
 load_dotenv()
 
@@ -76,7 +77,73 @@ class OllamaChat(BaseLLM):
 
         except Exception as e:
             logger.error(f"Failed to generate response: {str(e)}")
-            raise Exception(f"Error generating response with model {model_name}: {str(e)}") 
+            raise Exception(f"Error generating response with model {model_name}: {str(e)}")
+
+    def generate_streaming_response(self, prompt: str, system_prompt: str = None, model: str = None, max_tokens: int = None) -> Generator[str, None, None]:
+        """
+        Generate a streaming chat response using Ollama.
+
+        Args:
+            prompt (str): The input prompt for the chat.
+            system_prompt (str, optional): The system prompt for context.
+            model (str, optional): The model to use. Defaults to self.model.
+            max_tokens (int, optional): Maximum tokens for response.
+
+        Yields:
+            str: Streaming chunks of the generated response including thinking process.
+        """
+        try:
+            # Use provided model or fall back to default
+            model_name = model or self.model
+            logger.debug(f"Generating streaming response with model: {model_name}")
+            logger.debug(f"Prompt: {prompt[:50]}...")  # Log first 50 chars of prompt
+            
+            # Verify model exists
+            try:
+                logger.info(f"Using model: {model_name}")
+            except Exception as model_error:
+                raise Exception(f"Model verification failed: {str(model_error)}")
+
+            # Prepare the messages
+            messages = []
+            
+            # Add system message if provided
+            if system_prompt:
+                messages.append({
+                    "role": "system",
+                    "content": system_prompt
+                })
+                logger.debug(f"System prompt: {system_prompt[:50]}...")
+            
+            # Add user message
+            messages.append({
+                "role": "user",
+                "content": prompt
+            })
+
+            logger.debug(f"Sending streaming request to Ollama with {len(messages)} messages")
+            
+            # Use streaming mode
+            stream = ollama.chat(
+                model=model_name,
+                messages=messages,
+                stream=True
+            )
+            
+            logger.debug("Successfully started streaming response from Ollama")
+            
+            # Stream each chunk as it arrives
+            for chunk in stream:
+                if 'message' in chunk and 'content' in chunk['message']:
+                    content = chunk['message']['content']
+                    if content:  # Yield all content including thinking tags
+                        yield content
+                        
+            logger.debug("Streaming response completed")
+
+        except Exception as e:
+            logger.error(f"Failed to generate streaming response: {str(e)}")
+            raise Exception(f"Error generating streaming response with model {model_name}: {str(e)}")
         
     def generate_autocomplete(self, partial_prompt: str, max_tokens: int = 50, model: str = None) -> str:
         """
